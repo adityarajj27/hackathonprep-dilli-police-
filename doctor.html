@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swasth seva – Healthcare Connect (Demo)</title>
+<meta name="description" content="Dhanno connects patients with doctors, pharmacies, hospitals and ambulances. Hackathon demo with sample data.">
+<style>
+/* ============================== CSS ============================== */
+:root{
+  --navy:#071B3A; --navy2:#0B2550; --navy3:#12326B; --card:#0D2554;
+  --yellow:#FFD43B; --yellow2:#FFE680; --text:#EAF0FB; --muted:#9FB1D1;
+  --ok:#3DDC97; --bad:#FF6B6B; --line:rgba(255,255,255,.1);
+  --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans Devanagari',sans-serif;background:var(--navy);color:var(--text);line-height:1.55;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(600px 400px at 85% -5%,rgba(255,212,59,.14),transparent 60%),
+  radial-gradient(700px 500px at -10% 30%,rgba(60,120,255,.18),transparent 60%),var(--navy)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+input,select{font:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+/* Demo banner */
+.demo-banner{background:var(--yellow);color:var(--navy);text-align:center;font-weight:700;font-size:.85rem;padding:6px 12px}
+
+/* Header */
+header{position:sticky;top:0;z-index:50;background:rgba(7,27,58,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav{max-width:1200px;margin:auto;display:flex;align-items:center;gap:14px;padding:12px 18px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem;letter-spacing:.3px}
+.logo i{width:36px;height:36px;border-radius:11px;background:var(--yellow);color:var(--navy);display:grid;place-items:center;font-style:normal;font-size:1.2rem;animation:pulse 2.4s infinite}
+.logo span{color:var(--yellow)}
+nav.links{display:flex;gap:4px;margin-left:auto}
+nav.links button{background:none;padding:8px 13px;border-radius:999px;color:var(--muted);font-weight:600;transition:.25s}
+nav.links button:hover{color:var(--text);background:rgba(255,255,255,.07)}
+nav.links button.active{background:var(--yellow);color:var(--navy)}
+.lang{display:flex;background:var(--navy2);border-radius:999px;padding:3px;border:1px solid var(--line)}
+.lang button{background:none;padding:5px 12px;border-radius:999px;font-weight:700;font-size:.85rem;color:var(--muted);transition:.25s}
+.lang button.on{background:var(--yellow);color:var(--navy)}
+.burger{display:none;background:var(--navy2);width:42px;height:42px;border-radius:12px;font-size:1.3rem}
+
+/* Layout */
+main{max-width:1200px;margin:auto;padding:22px 18px 110px}
+.view{display:none;animation:fadeUp .5s ease}
+.view.show{display:block}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;font-weight:800}
+h2{font-size:clamp(1.4rem,3vw,2rem);margin-bottom:6px}
+h3{font-size:1.1rem}
+.muted{color:var(--muted)}
+.hl{color:var(--yellow)}
+.section-head{display:flex;flex-wrap:wrap;gap:10px;align-items:end;justify-content:space-between;margin:10px 0 16px}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding:30px 0 10px}
+.hero p{margin:16px 0 24px;color:var(--muted);font-size:1.1rem;max-width:520px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.btn{background:var(--yellow);color:var(--navy);font-weight:800;padding:12px 22px;border-radius:999px;transition:.25s;box-shadow:0 6px 20px rgba(255,212,59,.25)}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(255,212,59,.35)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--text);border:1.5px solid var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--yellow);color:var(--yellow)}
+.btn.sm{padding:8px 15px;font-size:.88rem}
+.btn.red{background:var(--bad);color:#fff;box-shadow:none}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.hero-art{position:relative;aspect-ratio:1;max-width:430px;margin:auto;width:100%}
+.hero-art .ring{position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(255,212,59,.35);animation:spin 30s linear infinite}
+.hero-art .ring.r2{inset:12%;animation-direction:reverse;animation-duration:20s;border-color:rgba(255,255,255,.18)}
+.hero-art .core{position:absolute;inset:26%;border-radius:50%;background:radial-gradient(circle,var(--yellow),#e6b800);display:grid;place-items:center;font-size:4.5rem;color:var(--navy);animation:pulse 2.6s infinite;font-weight:900}
+.chip-float{position:absolute;background:var(--card);border:1px solid var(--line);padding:8px 13px;border-radius:14px;font-weight:700;font-size:.85rem;box-shadow:var(--shadow);animation:float 5s ease-in-out infinite}
+.chip-float:nth-of-type(3){top:4%;left:6%}
+.chip-float:nth-of-type(4){top:18%;right:-2%;animation-delay:-1.5s}
+.chip-float:nth-of-type(5){bottom:12%;left:-2%;animation-delay:-3s}
+.chip-float:nth-of-type(6){bottom:2%;right:8%;animation-delay:-4s}
+
+/* Context bar (template variables) */
+.ctx{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 6px}
+.ctx span{background:var(--navy2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.82rem;color:var(--muted)}
+.ctx b{color:var(--yellow)}
+
+/* Cards / grids */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{background:linear-gradient(160deg,var(--card),var(--navy2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;transition:.3s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-6px);border-color:rgba(255,212,59,.5);box-shadow:var(--shadow)}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,212,59,.07),transparent 70%);transform:translateX(-100%);transition:.7s}
+.card:hover::after{transform:translateX(100%)}
+.avatar{width:54px;height:54px;border-radius:16px;background:var(--yellow);color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:1.2rem;flex:none}
+.row{display:flex;gap:12px;align-items:center}
+.between{justify-content:space-between}
+.mt{margin-top:12px}
+.tag{display:inline-block;font-size:.74rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(255,212,59,.14);color:var(--yellow);margin:3px 4px 0 0}
+.tag.on{background:rgba(61,220,151,.15);color:var(--ok)}
+.tag.off{background:rgba(255,107,107,.15);color:var(--bad)}
+.tag.blue{background:rgba(90,150,255,.18);color:#9cc2ff}
+.dist{font-weight:800;color:var(--yellow)}
+.demo-tag{position:absolute;top:10px;right:10px;font-size:.62rem;background:rgba(255,255,255,.1);padding:2px 7px;border-radius:6px;color:var(--muted);letter-spacing:.5px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* Filters */
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.search{flex:1 1 260px;display:flex;align-items:center;gap:8px;background:var(--navy2);border:1.5px solid var(--line);border-radius:999px;padding:4px 16px;transition:.25s}
+.search:focus-within{border-color:var(--yellow);box-shadow:0 0 0 4px rgba(255,212,59,.12)}
+.search input{flex:1;background:none;border:0;color:var(--text);padding:9px 0;outline:0}
+select{background:var(--navy2);color:var(--text);border:1.5px solid var(--line);border-radius:999px;padding:10px 16px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.pill{background:var(--navy2);border:1px solid var(--line);padding:7px 14px;border-radius:999px;font-weight:600;font-size:.88rem;transition:.25s}
+.pill:hover{border-color:var(--yellow)}
+.pill.on{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+
+/* Dashboard */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:26px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;text-align:left;transition:.3s}
+.stat:hover{transform:translateY(-4px);border-color:var(--yellow)}
+.stat b{font-size:2.2rem;color:var(--yellow);display:block;line-height:1.1}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bars{display:flex;align-items:end;gap:10px;height:170px;margin-top:14px}
+.bars div{flex:1;background:linear-gradient(180deg,var(--yellow),#c79a00);border-radius:8px 8px 0 0;height:0;transition:height 1.2s cubic-bezier(.2,.8,.2,1);position:relative}
+.bars div span{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:.7rem;color:var(--muted);white-space:nowrap}
+.bars div em{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.72rem;font-style:normal;font-weight:700}
+.dash-note{font-size:.78rem;color:var(--muted);margin-top:30px}
+
+/* Map */
+.map{background:radial-gradient(circle,#0e2d63,#061630);border:1px solid var(--line);border-radius:var(--radius);width:100%;max-height:340px}
+.map .dot{cursor:pointer;transition:.2s;transform-box:fill-box;transform-origin:center}
+.map .dot:hover{transform:scale(1.6)}
+.sweep{transform-origin:200px 170px;animation:spin 5s linear infinite}
+
+/* Emergency */
+.sos{background:linear-gradient(135deg,#ff4d4d,#b30000);border:0}
+.sos h2{color:#fff}
+.sos-btn{width:130px;height:130px;border-radius:50%;background:#fff;color:#c00000;font-weight:900;font-size:1.6rem;animation:sos 1.6s infinite;flex:none}
+.sos-btn:hover{transform:scale(1.07)}
+.timeline{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.timeline div{display:flex;gap:10px;align-items:center;opacity:.35;transition:.5s}
+.timeline div.done{opacity:1}
+.timeline div i{width:22px;height:22px;border-radius:50%;background:var(--ok);display:grid;place-items:center;color:var(--navy);font-style:normal;font-size:.8rem;font-weight:800}
+
+/* Aftercare */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.check{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--navy2);border:1px solid var(--line);margin-bottom:10px;cursor:pointer;transition:.25s}
+.check:hover{border-color:var(--yellow);transform:translateX(4px)}
+.check input{accent-color:var(--yellow);width:20px;height:20px;margin-top:3px}
+.check.done span{text-decoration:line-through;color:var(--muted)}
+.progress{height:10px;background:var(--navy2);border-radius:99px;overflow:hidden;margin:10px 0 20px}
+.progress div{height:100%;background:linear-gradient(90deg,var(--yellow),var(--ok));width:0;transition:width .6s}
+
+/* Modal & toast */
+.modal-bg{position:fixed;inset:0;background:rgba(2,10,25,.75);backdrop-filter:blur(6px);display:none;place-items:center;z-index:100;padding:16px}
+.modal-bg.open{display:grid;animation:fade .25s}
+.modal{background:var(--navy2);border:1px solid var(--line);border-radius:22px;padding:24px;width:min(480px,100%);max-height:90vh;overflow:auto;animation:pop .35s}
+.modal label{display:block;margin:12px 0 5px;font-weight:600;font-size:.9rem}
+.modal input,.modal select{width:100%;background:var(--navy);border-radius:12px}
+.modal input{border:1.5px solid var(--line);color:var(--text);padding:10px 14px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,40px);background:var(--yellow);color:var(--navy);padding:12px 22px;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:.4s;z-index:200;max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Pitch slides */
+.slides{scroll-snap-type:y proximity}
+.slide{min-height:78vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:30px;margin-bottom:22px;border-radius:28px;background:linear-gradient(150deg,var(--navy2),var(--navy));border:1px solid var(--line);position:relative;overflow:hidden}
+.slide::before{content:attr(data-n);position:absolute;right:24px;top:6px;font-size:9rem;font-weight:900;color:rgba(255,212,59,.07)}
+.slide ul{list-style:none;display:grid;gap:10px;max-width:760px}
+.slide li{background:rgba(255,255,255,.05);padding:12px 16px;border-radius:12px;border-left:4px solid var(--yellow)}
+
+/* Mobile bottom nav */
+.bottom{display:none}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:30px 16px}
+
+/* Keyframes */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{50%{transform:translateY(-12px)}}
+@keyframes pulse{50%{box-shadow:0 0 0 14px rgba(255,212,59,0)}0%{box-shadow:0 0 0 0 rgba(255,212,59,.5)}}
+@keyframes sos{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}100%{box-shadow:0 0 0 30px rgba(255,255,255,0)}}
+.reveal{opacity:0;transform:translateY(24px);transition:.7s}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+
+/* Responsive */
+@media(max-width:860px){
+  .hero,.two{grid-template-columns:1fr}
+  nav.links{display:none}
+  .lang{margin-left:auto}
+  .burger{display:none}
+  .bottom{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(7,27,58,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:60;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .bottom button{background:none;display:flex;flex-direction:column;align-items:center;font-size:.66rem;color:var(--muted);padding:4px 6px;gap:2px;border-radius:10px;font-weight:600}
+  .bottom button b{font-size:1.25rem}
+  .bottom button.active{color:var(--yellow)}
+  .toast{bottom:84px}
+}
+</style>
+</head>
+<body>
+
+<div class="demo-banner" id="demoBanner"></div>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="#home" data-go="home"><i>✚</i>Swasth<span>Seva</span></a>
+    <nav class="links" id="topNav"></nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="hi">हिन्दी</button>
+      <button data-lang="en">English</button>
+    </div>
+  </div>
+</header>
+
+<main id="app" tabindex="-1"></main>
+
+<nav class="bottom" id="bottomNav"></nav>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<footer id="footer"></footer>
+
+<script>
+/* ============================== JS ==============================
+   Structure:
+   1. i18n dictionary (Hindi / English)
+   2. DEMO DATA (all fictional – not real availability)
+   3. Backend layer  -> API.* (async, persisted in localStorage)
+   4. Helpers (distance, search, template variables)
+   5. Components / views
+   6. Router + events
+=================================================================== */
+
+/* ---------- 1. i18n ---------- */
+const I18N = {
+ en:{
+  demoBanner:"DEMO DATA — all doctors, shops, hospitals & availability shown are fictional samples for a hackathon. Not real. In an emergency call 112.",
+  nav_home:"Home",nav_doctors:"Doctors",nav_pharmacy:"Pharmacy",nav_hospitals:"Hospitals",nav_emergency:"Emergency",nav_aftercare:"Aftercare",nav_pitch:"Pitch",
+  hero_title:"Care that comes <span class='hl'>to you</span>.",
+  hero_sub:"Find doctors online or nearby, order medicines, locate hospitals and call an ambulance — in Hindi or English.",
+  cta_doc:"Find a doctor",cta_sos:"Emergency help",
+  chip1:"🩺 Online doctors",chip2:"💊 Medicine delivery",chip3:"🏥 Nearby hospitals",chip4:"🚑 Ambulance",
+  ctx_loc:"Location",ctx_spec:"Speciality",ctx_med:"Medicine",ctx_hosp:"Hospital type",ctx_lang:"Language",
+  ctx_all:"All",
+  locate:"📍 Use my GPS",locating:"Locating…",loc_ok:"Location updated",loc_fail:"GPS unavailable – using default location",
+  dash_title:"Platform dashboard (demo numbers)",st_doc:"Doctors listed",st_pharm:"Pharmacies",st_hosp:"Hospitals",st_amb:"Ambulances",
+  chart_title:"Demo appointments by speciality",dash_note:"Numbers are illustrative sample data, not real statistics.",
+  spec_title:"Specialities",
+  search_ph:"Search in Hindi or English… (e.g. बच्चों का डॉक्टर, dentist, bukhar)",
+  f_mode:"Mode",f_all:"All",f_online:"Online",f_offline:"In-clinic",f_sort:"Sort by",f_dist:"Distance",f_rating:"Rating",f_fee:"Fee",
+  f_type:"Type",f_private:"Private",f_gov:"Government",f_clinic:"Clinic",f_delivery:"Delivery only",f_open:"Open now",
+  available_online:"Online now",available_offline:"In-clinic",both:"Online + Clinic",unavailable:"Unavailable today",
+  book:"Book appointment",call:"Call",directions:"Directions",km:"km",exp:"yrs exp",fee:"Fee",
+  doc_title:"Doctor directory",pharm_title:"Medicine supply",hosp_title:"Hospitals & clinics",
+  results:"results",no_results:"No results. Try another word or clear filters.",
+  med_title:"Medicine information",med_ph:"Search medicine (e.g. paracetamol, पैरासिटामोल)",
+  uses:"Used for",warn:"Caution",rx:"Prescription needed",otc:"Over the counter",
+  med_disclaimer:"Information is general and for demo only. Always follow your doctor's or pharmacist's advice.",
+  order:"Order",delivers:"Delivers",no_delivery:"Pickup only",stock:"In stock (demo)",eta:"ETA",
+  open_now:"Open now",closed:"Closed",hours:"Hours",services:"Services",beds:"Beds",
+  emer_title:"Emergency & ambulance",emer_sub:"Dial 112 (all emergencies) or 102 / 108 (ambulance) in India.",
+  sos:"SOS",sos_help:"Request ambulance (demo)",amb_title:"Ambulances nearby (demo)",
+  amb_basic:"Basic Life Support",amb_adv:"Advanced Life Support",amb_free:"Government free",amb_priv:"Private",
+  sos_steps:["Request received","Nearest unit matched","Ambulance dispatched","Crew calling you"],
+  sos_note:"This is a simulation. No real ambulance is dispatched. Call 112 or 108 for real emergencies.",
+  after_title:"Aftercare & documents",after_sub:"Checklists for hospital admission, surgery and discharge. Tick items as you complete them.",
+  tab_adm:"Admission",tab_op:"Operation",tab_dis:"Discharge",done:"done",
+  book_title:"Book appointment",your_name:"Your name",your_phone:"Phone number",pick_date:"Date",pick_slot:"Time slot",confirm:"Confirm booking",cancel:"Cancel",
+  booked:"Appointment saved (demo)",my_appts:"My appointments (saved on this device)",none_yet:"No appointments yet.",remove:"Remove",
+  ordered:"Order placed (demo)",need_name:"Please enter your name and phone",
+  pitch_title:"Hackathon pitch",
+  open_maps:"Open in Google Maps",map_title:"Map (relative positions, demo)",you:"You",
+  footer:"Dhanno · Hackathon prototype · Sample data only · Not a substitute for professional medical advice.",
+  see_all:"See all",
+ },
+ hi:{
+  demoBanner:"डेमो डेटा — यहाँ दिखाए गए सभी डॉक्टर, दुकानें, अस्पताल और उपलब्धता काल्पनिक नमूने हैं, असली नहीं। आपात स्थिति में 112 पर कॉल करें।",
+  nav_home:"होम",nav_doctors:"डॉक्टर",nav_pharmacy:"दवाइयाँ",nav_hospitals:"अस्पताल",nav_emergency:"आपातकाल",nav_aftercare:"देखभाल",nav_pitch:"पिच",
+  hero_title:"स्वास्थ्य सेवा, <span class='hl'>आपके पास</span>।",
+  hero_sub:"ऑनलाइन या नज़दीकी डॉक्टर खोजें, दवाइयाँ मँगाएँ, अस्पताल ढूँढें और एम्बुलेंस बुलाएँ — हिन्दी या अंग्रेज़ी में।",
+  cta_doc:"डॉक्टर खोजें",cta_sos:"आपातकालीन सहायता",
+  chip1:"🩺 ऑनलाइन डॉक्टर",chip2:"💊 दवा डिलीवरी",chip3:"🏥 नज़दीकी अस्पताल",chip4:"🚑 एम्बुलेंस",
+  ctx_loc:"स्थान",ctx_spec:"विशेषज्ञता",ctx_med:"दवा",ctx_hosp:"अस्पताल प्रकार",ctx_lang:"भाषा",
+  ctx_all:"सभी",
+  locate:"📍 मेरी GPS लोकेशन",locating:"खोज रहे हैं…",loc_ok:"लोकेशन अपडेट हुई",loc_fail:"GPS उपलब्ध नहीं – डिफ़ॉल्ट लोकेशन",
+  dash_title:"प्लेटफ़ॉर्म डैशबोर्ड (डेमो आँकड़े)",st_doc:"सूचीबद्ध डॉक्टर",st_pharm:"दवा की दुकानें",st_hosp:"अस्पताल",st_amb:"एम्बुलेंस",
+  chart_title:"विशेषज्ञता अनुसार डेमो अपॉइंटमेंट",dash_note:"आँकड़े केवल उदाहरण हैं, असली नहीं।",
+  spec_title:"विशेषज्ञताएँ",
+  search_ph:"हिन्दी या अंग्रेज़ी में खोजें… (जैसे बच्चों का डॉक्टर, dentist, bukhar)",
+  f_mode:"माध्यम",f_all:"सभी",f_online:"ऑनलाइन",f_offline:"क्लिनिक",f_sort:"क्रमबद्ध करें",f_dist:"दूरी",f_rating:"रेटिंग",f_fee:"फ़ीस",
+  f_type:"प्रकार",f_private:"निजी",f_gov:"सरकारी",f_clinic:"क्लिनिक",f_delivery:"केवल डिलीवरी",f_open:"अभी खुला",
+  available_online:"अभी ऑनलाइन",available_offline:"क्लिनिक में",both:"ऑनलाइन + क्लिनिक",unavailable:"आज उपलब्ध नहीं",
+  book:"अपॉइंटमेंट बुक करें",call:"कॉल",directions:"रास्ता",km:"कि.मी.",exp:"वर्ष अनुभव",fee:"फ़ीस",
+  doc_title:"डॉक्टर निर्देशिका",pharm_title:"दवा आपूर्ति",hosp_title:"अस्पताल और क्लिनिक",
+  results:"परिणाम",no_results:"कोई परिणाम नहीं। दूसरा शब्द आज़माएँ या फ़िल्टर हटाएँ।",
+  med_title:"दवा की जानकारी",med_ph:"दवा खोजें (जैसे पैरासिटामोल, paracetamol)",
+  uses:"उपयोग",warn:"सावधानी",rx:"पर्चा ज़रूरी",otc:"बिना पर्चे के उपलब्ध",
+  med_disclaimer:"जानकारी सामान्य और केवल डेमो के लिए है। हमेशा अपने डॉक्टर या फ़ार्मासिस्ट की सलाह मानें।",
+  order:"ऑर्डर करें",delivers:"डिलीवरी उपलब्ध",no_delivery:"केवल दुकान से",stock:"स्टॉक में (डेमो)",eta:"अनुमानित समय",
+  open_now:"अभी खुला",closed:"बंद",hours:"समय",services:"सेवाएँ",beds:"बिस्तर",
+  emer_title:"आपातकाल और एम्बुलेंस",emer_sub:"भारत में 112 (सभी आपात) या 102 / 108 (एम्बुलेंस) डायल करें।",
+  sos:"SOS",sos_help:"एम्बुलेंस बुलाएँ (डेमो)",amb_title:"नज़दीकी एम्बुलेंस (डेमो)",
+  amb_basic:"बेसिक लाइफ सपोर्ट",amb_adv:"एडवांस्ड लाइफ सपोर्ट",amb_free:"सरकारी निःशुल्क",amb_priv:"निजी",
+  sos_steps:["अनुरोध मिला","नज़दीकी वाहन चुना गया","एम्बुलेंस रवाना","क्रू आपको कॉल कर रहा है"],
+  sos_note:"यह केवल सिमुलेशन है। कोई असली एम्बुलेंस नहीं भेजी जाती। असली आपात में 112 या 108 पर कॉल करें।",
+  after_title:"देखभाल और दस्तावेज़",after_sub:"अस्पताल में भर्ती, ऑपरेशन और डिस्चार्ज की चेकलिस्ट। पूरा होने पर टिक करें।",
+  tab_adm:"भर्ती",tab_op:"ऑपरेशन",tab_dis:"डिस्चार्ज",done:"पूर्ण",
+  book_title:"अपॉइंटमेंट बुक करें",your_name:"आपका नाम",your_phone:"फ़ोन नंबर",pick_date:"तारीख",pick_slot:"समय",confirm:"बुकिंग पक्की करें",cancel:"रद्द करें",
+  booked:"अपॉइंटमेंट सेव हुआ (डेमो)",my_appts:"मेरे अपॉइंटमेंट (इसी डिवाइस पर सेव)",none_yet:"अभी कोई अपॉइंटमेंट नहीं।",remove:"हटाएँ",
+  ordered:"ऑर्डर दर्ज हुआ (डेमो)",need_name:"कृपया नाम और फ़ोन नंबर भरें",
+  pitch_title:"हैकाथॉन पिच",
+  open_maps:"Google Maps में खोलें",map_title:"मानचित्र (सापेक्ष स्थिति, डेमो)",you:"आप",
+  footer:"धन्नो · हैकाथॉन प्रोटोटाइप · केवल नमूना डेटा · पेशेवर चिकित्सकीय सलाह का विकल्प नहीं।",
+  see_all:"सभी देखें",
+ }
+};
+
+/* ---------- 2. DEMO DATA (fictional) ---------- */
+const SPECS = [
+ {id:"neuro",ic:"🧠",en:"Neurology",hi:"न्यूरोलॉजी",alias:"brain nerve headache migraine seizure dimag sir dard mirgi दिमाग सिरदर्द"},
+ {id:"psych",ic:"💭",en:"Psychology",hi:"मनोविज्ञान",alias:"mental stress anxiety depression counselling tanav chinta मानसिक तनाव"},
+ {id:"dental",ic:"🦷",en:"Dentistry",hi:"दंत चिकित्सा",alias:"dentist teeth tooth daant dant दाँत दांत"},
+ {id:"ortho",ic:"🦴",en:"Orthopaedics",hi:"हड्डी रोग",alias:"bone joint fracture knee back pain haddi jod ghutna हड्डी जोड़ घुटना"},
+ {id:"paed",ic:"👶",en:"Paediatrics",hi:"बाल रोग",alias:"child kids baby pediatrician bacche bachon ka doctor बच्चों शिशु"},
+ {id:"geri",ic:"🧓",en:"Geriatrics",hi:"वृद्ध देखभाल",alias:"elderly old age senior budhapa bujurg बुज़ुर्ग बूढ़े"},
+ {id:"gyn",ic:"🌸",en:"Gynaecology",hi:"स्त्री रोग",alias:"women female period mahila stri rog gynecologist महिला"},
+ {id:"preg",ic:"🤰",en:"Pregnancy care",hi:"गर्भावस्था देखभाल",alias:"pregnant maternity prenatal garbh pregnancy delivery गर्भवती प्रसव"},
+];
+
+/* base point: Sonipat, Haryana (default {location}) – all offsets below are fictional */
+const DEFAULT_LOC = {lat:28.9931,lng:77.0151,name:"Sonipat (default)"};
+const off = (dLat,dLng)=>({lat:DEFAULT_LOC.lat+dLat,lng:DEFAULT_LOC.lng+dLng});
+
+const DOCTORS = [
+ {id:"d1",name:{en:"Dr. Aarav Mehta",hi:"डॉ. आरव मेहता"},spec:"neuro",mode:"both",exp:14,fee:700,rating:4.8,place:{en:"Demo NeuroCare Clinic",hi:"डेमो न्यूरोकेयर क्लिनिक"},...off(.012,.008),langs:"Hindi English"},
+ {id:"d2",name:{en:"Dr. Sneha Kapoor",hi:"डॉ. स्नेहा कपूर"},spec:"psych",mode:"online",exp:9,fee:600,rating:4.7,place:{en:"Video consult",hi:"वीडियो परामर्श"},...off(.02,-.01),langs:"Hindi English"},
+ {id:"d3",name:{en:"Dr. Rohit Sharma",hi:"डॉ. रोहित शर्मा"},spec:"dental",mode:"offline",exp:11,fee:400,rating:4.5,place:{en:"Demo Smile Dental",hi:"डेमो स्माइल डेंटल"},...off(-.006,.011),langs:"Hindi English"},
+ {id:"d4",name:{en:"Dr. Kavita Rana",hi:"डॉ. कविता राणा"},spec:"ortho",mode:"both",exp:17,fee:800,rating:4.9,place:{en:"Demo Bone & Joint Centre",hi:"डेमो बोन एंड जॉइंट सेंटर"},...off(.03,.02),langs:"Hindi English"},
+ {id:"d5",name:{en:"Dr. Nitin Verma",hi:"डॉ. नितिन वर्मा"},spec:"paed",mode:"both",exp:12,fee:500,rating:4.8,place:{en:"Demo Little Stars Clinic",hi:"डेमो लिटिल स्टार्स क्लिनिक"},...off(.004,-.015),langs:"Hindi English"},
+ {id:"d6",name:{en:"Dr. Sunita Yadav",hi:"डॉ. सुनीता यादव"},spec:"geri",mode:"offline",exp:21,fee:550,rating:4.6,place:{en:"Demo Elder Care Clinic",hi:"डेमो एल्डर केयर क्लिनिक"},...off(-.015,-.006),langs:"Hindi"},
+ {id:"d7",name:{en:"Dr. Priya Malhotra",hi:"डॉ. प्रिया मल्होत्रा"},spec:"gyn",mode:"both",exp:15,fee:650,rating:4.8,place:{en:"Demo Mahila Health Centre",hi:"डेमो महिला स्वास्थ्य केंद्र"},...off(.009,-.022),langs:"Hindi English"},
+ {id:"d8",name:{en:"Dr. Anjali Singh",hi:"डॉ. अंजलि सिंह"},spec:"preg",mode:"online",exp:10,fee:600,rating:4.7,place:{en:"Video consult",hi:"वीडियो परामर्श"},...off(.04,.03),langs:"Hindi English"},
+ {id:"d9",name:{en:"Dr. Vikram Chauhan",hi:"डॉ. विक्रम चौहान"},spec:"neuro",mode:"offline",exp:8,fee:500,rating:4.3,place:{en:"Demo City Neuro Point",hi:"डेमो सिटी न्यूरो पॉइंट"},...off(-.025,.015),langs:"Hindi English"},
+ {id:"d10",name:{en:"Dr. Meera Joshi",hi:"डॉ. मीरा जोशी"},spec:"paed",mode:"online",exp:7,fee:350,rating:4.4,place:{en:"Video consult",hi:"वीडियो परामर्श"},...off(.05,-.04),langs:"Hindi English"},
+ {id:"d11",name:{en:"Dr. Imran Khan",hi:"डॉ. इमरान खान"},spec:"psych",mode:"offline",exp:13,fee:900,rating:4.6,place:{en:"Demo MindCare Clinic",hi:"डेमो माइंडकेयर क्लिनिक"},...off(.017,.025),langs:"Hindi English"},
+ {id:"d12",name:{en:"Dr. Pooja Dahiya",hi:"डॉ. पूजा दहिया"},spec:"dental",mode:"both",exp:6,fee:300,rating:4.2,place:{en:"Demo Pearl Dental",hi:"डेमो पर्ल डेंटल"},...off(-.01,-.02),langs:"Hindi English"},
+];
+
+const MEDS = [
+ {id:"m1",name:{en:"Paracetamol 500 mg",hi:"पैरासिटामोल 500 मि.ग्रा."},alias:"crocin dolo fever bukhar bukhaar pain बुखार दर्द",use:{en:"Fever and mild pain",hi:"बुखार और हल्का दर्द"},warn:{en:"Do not exceed the dose on the label. Caution in liver disease.",hi:"लेबल पर लिखी मात्रा से अधिक न लें। लीवर रोग में सावधानी।"},rx:false,price:22},
+ {id:"m2",name:{en:"ORS sachet",hi:"ओआरएस पैकेट"},alias:"dehydration diarrhoea loose motion dast जलन पानी की कमी दस्त",use:{en:"Replaces fluids and salts during diarrhoea",hi:"दस्त में पानी और नमक की पूर्ति"},warn:{en:"Use clean water. See a doctor if it lasts over 2 days.",hi:"साफ़ पानी में घोलें। 2 दिन से ज़्यादा रहे तो डॉक्टर को दिखाएँ।"},rx:false,price:20},
+ {id:"m3",name:{en:"Cetirizine 10 mg",hi:"सेटिरिज़िन 10 मि.ग्रा."},alias:"allergy cold sneezing khansi zukam एलर्जी जुकाम छींक",use:{en:"Allergy and sneezing",hi:"एलर्जी और छींक"},warn:{en:"May cause drowsiness. Avoid driving.",hi:"नींद आ सकती है। गाड़ी न चलाएँ।"},rx:false,price:30},
+ {id:"m4",name:{en:"Amoxicillin 500 mg",hi:"एमोक्सिसिलिन 500 मि.ग्रा."},alias:"antibiotic infection ekta जीवाणु संक्रमण एंटीबायोटिक",use:{en:"Bacterial infections (doctor-prescribed)",hi:"जीवाणु संक्रमण (डॉक्टर के पर्चे पर)"},warn:{en:"Prescription only. Complete the course as advised.",hi:"केवल पर्चे पर। डॉक्टर के अनुसार कोर्स पूरा करें।"},rx:true,price:95},
+ {id:"m5",name:{en:"Pantoprazole 40 mg",hi:"पैंटोप्राज़ोल 40 मि.ग्रा."},alias:"acidity gas heartburn pet jalan acid एसिडिटी गैस सीने में जलन",use:{en:"Acidity and reflux",hi:"एसिडिटी और रिफ्लक्स"},warn:{en:"Take before food. Long use needs medical advice.",hi:"खाने से पहले लें। लंबे समय के लिए डॉक्टर की सलाह लें।"},rx:true,price:65},
+ {id:"m6",name:{en:"Iron + Folic acid",hi:"आयरन + फोलिक एसिड"},alias:"anaemia anemia pregnancy khoon ki kami खून की कमी गर्भावस्था",use:{en:"Anaemia and pregnancy supplement",hi:"खून की कमी और गर्भावस्था सप्लीमेंट"},warn:{en:"May darken stools. Follow your doctor's dose.",hi:"मल का रंग गहरा हो सकता है। डॉक्टर की बताई मात्रा लें।"},rx:false,price:45},
+ {id:"m7",name:{en:"Salbutamol inhaler",hi:"साल्ब्यूटामोल इन्हेलर"},alias:"asthma breathing dama saans दमा साँस अस्थमा",use:{en:"Quick relief in wheezing / asthma",hi:"साँस फूलने / अस्थमा में तुरंत राहत"},warn:{en:"Prescription only. Seek urgent care if no relief.",hi:"केवल पर्चे पर। आराम न मिले तो तुरंत अस्पताल जाएँ।"},rx:true,price:140},
+ {id:"m8",name:{en:"Calcium + Vitamin D3",hi:"कैल्शियम + विटामिन डी3"},alias:"bones weakness calcium haddi kamzori हड्डी कमज़ोरी",use:{en:"Bone health supplement",hi:"हड्डियों के लिए सप्लीमेंट"},warn:{en:"Do not combine with other calcium products without advice.",hi:"सलाह के बिना दूसरे कैल्शियम उत्पादों के साथ न लें।"},rx:false,price:120},
+];
+
+const PHARMACIES = [
+ {id:"p1",name:{en:"Demo Jan Aushadhi Store",hi:"डेमो जन औषधि केंद्र"},delivery:true,eta:35,open:true,hours:"8:00–22:00",phone:"DEMO-1001",...off(.005,.004),meds:["m1","m2","m3","m6","m8"]},
+ {id:"p2",name:{en:"Demo Apollo-style Pharmacy",hi:"डेमो फ़ार्मेसी प्लस"},delivery:true,eta:25,open:true,hours:"24 hrs",phone:"DEMO-1002",...off(-.008,.01),meds:["m1","m3","m4","m5","m7"]},
+ {id:"p3",name:{en:"Demo City Medicos",hi:"डेमो सिटी मेडिकोज़"},delivery:false,eta:0,open:true,hours:"9:00–21:00",phone:"DEMO-1003",...off(.014,-.012),meds:["m1","m2","m5","m8"]},
+ {id:"p4",name:{en:"Demo Sanjivani Medical",hi:"डेमो संजीवनी मेडिकल"},delivery:true,eta:45,open:false,hours:"10:00–20:00",phone:"DEMO-1004",...off(.022,.018),meds:["m2","m3","m4","m6","m7"]},
+ {id:"p5",name:{en:"Demo Shree Chemist",hi:"डेमो श्री केमिस्ट"},delivery:false,eta:0,open:true,hours:"7:00–23:00",phone:"DEMO-1005",...off(-.02,-.014),meds:["m1","m4","m5","m8"]},
+ {id:"p6",name:{en:"Demo HealthKart Express",hi:"डेमो हेल्थकार्ट एक्सप्रेस"},delivery:true,eta:20,open:true,hours:"24 hrs",phone:"DEMO-1006",...off(.001,-.03),meds:["m1","m2","m3","m4","m5","m6","m7","m8"]},
+];
+
+const HOSPITALS = [
+ {id:"h1",name:{en:"Demo Civil Hospital",hi:"डेमो सिविल अस्पताल"},type:"gov",open:true,hours:"24 hrs",beds:220,phone:"DEMO-2001",services:{en:["Emergency","Maternity","Paediatrics","Orthopaedics","Pharmacy"],hi:["आपातकाल","प्रसूति","बाल रोग","हड्डी रोग","फ़ार्मेसी"]},...off(.007,.003)},
+ {id:"h2",name:{en:"Demo Medanta-style Super Speciality",hi:"डेमो सुपर स्पेशियलिटी अस्पताल"},type:"private",open:true,hours:"24 hrs",beds:350,phone:"DEMO-2002",services:{en:["Neurology","Orthopaedics","ICU","Cardiac","Emergency"],hi:["न्यूरोलॉजी","हड्डी रोग","आईसीयू","हृदय रोग","आपातकाल"]},...off(.026,.019)},
+ {id:"h3",name:{en:"Demo Community Health Centre",hi:"डेमो सामुदायिक स्वास्थ्य केंद्र"},type:"gov",open:true,hours:"8:00–20:00",beds:60,phone:"DEMO-2003",services:{en:["OPD","Vaccination","Pregnancy care","Lab"],hi:["ओपीडी","टीकाकरण","गर्भावस्था देखभाल","लैब"]},...off(-.012,.016)},
+ {id:"h4",name:{en:"Demo Mother & Child Hospital",hi:"डेमो मातृ एवं शिशु अस्पताल"},type:"private",open:true,hours:"24 hrs",beds:90,phone:"DEMO-2004",services:{en:["Gynaecology","Pregnancy care","Paediatrics","NICU"],hi:["स्त्री रोग","गर्भावस्था देखभाल","बाल रोग","एनआईसीयू"]},...off(.011,-.02)},
+ {id:"h5",name:{en:"Demo Family Clinic",hi:"डेमो फैमिली क्लिनिक"},type:"clinic",open:true,hours:"9:00–19:00",beds:0,phone:"DEMO-2005",services:{en:["General physician","Dental","Psychology"],hi:["सामान्य चिकित्सक","दंत","मनोविज्ञान"]},...off(-.004,-.007)},
+ {id:"h6",name:{en:"Demo Wellness Clinic",hi:"डेमो वेलनेस क्लिनिक"},type:"clinic",open:false,hours:"10:00–18:00",beds:0,phone:"DEMO-2006",services:{en:["Geriatrics","Physiotherapy"],hi:["वृद्ध देखभाल","फ़िज़ियोथेरेपी"]},...off(.019,-.006)},
+ {id:"h7",name:{en:"Demo District Hospital",hi:"डेमो जिला अस्पताल"},type:"gov",open:true,hours:"24 hrs",beds:400,phone:"DEMO-2007",services:{en:["Emergency","Trauma","ICU","Surgery","Blood bank"],hi:["आपातकाल","ट्रॉमा","आईसीयू","सर्जरी","ब्लड बैंक"]},...off(-.03,-.01)},
+];
+
+const AMBULANCES = [
+ {id:"a1",name:{en:"Demo Govt Ambulance 108",hi:"डेमो सरकारी एम्बुलेंस 108"},kind:"free",level:"basic",avail:true,phone:"108",...off(.006,-.004)},
+ {id:"a2",name:{en:"Demo Rapid Care ALS",hi:"डेमो रैपिड केयर ALS"},kind:"private",level:"adv",avail:true,phone:"DEMO-3002",...off(-.011,.007)},
+ {id:"a3",name:{en:"Demo City Ambulance",hi:"डेमो सिटी एम्बुलेंस"},kind:"private",level:"basic",avail:false,phone:"DEMO-3003",...off(.02,.012)},
+ {id:"a4",name:{en:"Demo Hospital Transfer Unit",hi:"डेमो अस्पताल ट्रांसफ़र यूनिट"},kind:"private",level:"adv",avail:true,phone:"DEMO-3004",...off(-.018,-.02)},
+];
+
+const AFTERCARE = {
+ adm:{
+  en:["Photo ID (Aadhaar / voter ID / passport)","Doctor's referral or admission note","Previous medical reports and prescriptions","Insurance card / Ayushman Bharat card (if any)","Emergency contact details of a family member","Advance payment or insurance pre-authorisation","List of current medicines and allergies"],
+  hi:["फोटो पहचान पत्र (आधार / वोटर आईडी / पासपोर्ट)","डॉक्टर का रेफ़रल या भर्ती नोट","पुरानी मेडिकल रिपोर्ट और पर्चे","बीमा कार्ड / आयुष्मान भारत कार्ड (यदि हो)","परिवार के सदस्य का आपातकालीन संपर्क","अग्रिम भुगतान या बीमा पूर्व-स्वीकृति","वर्तमान दवाओं और एलर्जी की सूची"]},
+ op:{
+  en:["Signed surgical consent form","Anaesthesia fitness / pre-operative check report","Blood tests, ECG and imaging reports","Fasting instructions received (no food/water as advised)","Blood arrangement confirmed, if required","Remove jewellery, dentures and nail polish","Post-operative care plan explained"],
+  hi:["हस्ताक्षरित सर्जरी सहमति पत्र","एनेस्थीसिया फिटनेस / ऑपरेशन-पूर्व जाँच रिपोर्ट","ब्लड टेस्ट, ईसीजी और इमेजिंग रिपोर्ट","उपवास निर्देश मिल गए (डॉक्टर के अनुसार खाना/पानी बंद)","ज़रूरत हो तो रक्त की व्यवस्था पक्की","गहने, नकली दाँत और नेल पॉलिश हटाएँ","ऑपरेशन के बाद की देखभाल योजना समझाई गई"]},
+ dis:{
+  en:["Discharge summary received and checked","Final bill and insurance claim documents","All test and operation reports collected","Medicine list with dose and timing explained","Wound care and diet instructions understood","Follow-up appointment date noted","Warning signs explained – when to return urgently"],
+  hi:["डिस्चार्ज सारांश मिला और जाँचा","अंतिम बिल और बीमा क्लेम दस्तावेज़","सभी जाँच और ऑपरेशन रिपोर्ट ले लीं","दवाओं की सूची, मात्रा और समय समझ लिया","घाव की देखभाल और खान-पान निर्देश समझे","फ़ॉलो-अप की तारीख नोट की","खतरे के संकेत समझे – कब तुरंत वापस आना है"]}
+};
+
+/* ---------- 3. Backend layer (async API over localStorage) ---------- */
+const API = (() => {
+  const KEY = "dhanno_demo_v1";
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const write = d => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
+  const delay = (v) => new Promise(r => setTimeout(() => r(v), 250)); // simulates network
+  return {
+    listDoctors: () => delay(DOCTORS), listPharmacies: () => delay(PHARMACIES),
+    listHospitals: () => delay(HOSPITALS), listAmbulances: () => delay(AMBULANCES),
+    getAppointments: () => delay(read().appts || []),
+    bookAppointment: async (a) => {
+      if (!a.name || !a.phone) throw new Error("invalid");
+      const d = read(); d.appts = d.appts || [];
+      d.appts.unshift({...a, id: "ap" + Date.now(), status: "DEMO-CONFIRMED"});
+      write(d); return delay(true);
+    },
+    cancelAppointment: async (id) => { const d = read(); d.appts = (d.appts||[]).filter(x => x.id !== id); write(d); return delay(true); },
+    placeOrder: async (o) => { const d = read(); d.orders = d.orders || []; d.orders.unshift({...o, id:"or"+Date.now()}); write(d); return delay(true); },
+    getChecklist: (k) => (read().check || {})[k] || [],
+    setChecklist: (k, arr) => { const d = read(); d.check = d.check || {}; d.check[k] = arr; write(d); },
+    getPrefs: () => read().prefs || {}, setPrefs: (p) => { const d = read(); d.prefs = {...(d.prefs||{}), ...p}; write(d); },
+  };
+})();
+
+/* ---------- 4. State & helpers ---------- */
+const prefs = API.getPrefs();
+const state = {
+  lang: prefs.lang || "hi", view: "home", loc: prefs.loc || DEFAULT_LOC,
+  spec: "all", hospType: "all", medicine: "", q: "", mode: "all", sort: "dist",
+  deliveryOnly: false, openOnly: false, tab: "adm", sosStep: -1,
+};
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const t = k => I18N[state.lang][k] ?? I18N.en[k] ?? k;
+const L = o => o[state.lang] ?? o.en;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* template variables: {location} {speciality} {medicine} {hospital_type} {language} */
+function tpl(str){
+  const sp = SPECS.find(s => s.id === state.spec);
+  const vars = {
+    location: state.loc.name,
+    speciality: sp ? L(sp) : t("ctx_all"),
+    medicine: state.medicine || t("ctx_all"),
+    hospital_type: state.hospType === "all" ? t("ctx_all") : t("f_" + (state.hospType === "gov" ? "gov" : state.hospType)),
+    language: state.lang === "hi" ? "हिन्दी" : "English",
+  };
+  return str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+}
+
+const toRad = d => d * Math.PI / 180;
+function km(a, b){ // haversine
+  const R = 6371, dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const x = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+const withDist = arr => arr.map(x => ({...x, d: km(state.loc, x)}));
+
+/* multilingual search: matches English, Hindi and Hinglish alias text */
+const norm = s => String(s||"").toLowerCase().normalize("NFC");
+function hay(...parts){ return norm(parts.join(" ")); }
+function matches(haystack, q){
+  q = norm(q).trim(); if (!q) return true;
+  return q.split(/\s+/).every(w => haystack.includes(w));
+}
+const specOf = id => SPECS.find(s => s.id === id);
+
+function toast(msg){ const el = $("#toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 2600); }
+const mapsLink = x => `https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}`;
+const initials = n => n.replace(/^(Dr\.|डॉ\.)\s*/,"").split(" ").map(w => w[0]).slice(0,2).join("");
+
+/* ---------- 5. Components ---------- */
+const Tag = (txt, cls="") => `<span class="tag ${cls}">${esc(txt)}</span>`;
+const DemoTag = () => `<span class="demo-tag">DEMO</span>`;
+const Empty = () => `<div class="panel muted">${t("no_results")}</div>`;
+
+function modeTag(m){
+  return m === "online" ? Tag(t("available_online"),"on")
+       : m === "offline" ? Tag(t("available_offline"),"blue")
+       : Tag(t("both"),"on");
+}
+
+function DoctorCard(d){
+  const sp = specOf(d.spec);
+  return `<article class="card reveal">${DemoTag()}
+    <div class="row"><div class="avatar">${esc(initials(L(d.name)))}</div>
+      <div><h3>${esc(L(d.name))}</h3><div class="muted">${sp.ic} ${esc(L(sp))}</div></div></div>
+    <div class="mt">${modeTag(d.mode)}${Tag("⭐ " + d.rating)}${Tag(d.exp + " " + t("exp"))}</div>
+    <p class="muted mt">${esc(L(d.place))}</p>
+    <div class="row between mt"><span>${t("fee")}: <b class="hl">₹${d.fee}</b></span>
+      ${d.mode !== "online" ? `<span class="dist">${d.d.toFixed(1)} ${t("km")}</span>` : ""}</div>
+    <div class="actions">
+      <button class="btn sm" data-book="${d.id}">${t("book")}</button>
+      ${d.mode !== "online" ? `<a class="btn sm ghost" target="_blank" rel="noopener" href="${mapsLink(d)}">${t("directions")}</a>` : ""}
+    </div></article>`;
+}
+
+function PharmacyCard(p){
+  return `<article class="card reveal">${DemoTag()}
+    <div class="row between"><h3>💊 ${esc(L(p.name))}</h3><span class="dist">${p.d.toFixed(1)} ${t("km")}</span></div>
+    <div class="mt">${p.open ? Tag(t("open_now"),"on") : Tag(t("closed"),"off")}
+      ${p.delivery ? Tag("🛵 " + t("delivers") + " · " + p.eta + " min","on") : Tag(t("no_delivery"))}</div>
+    <p class="muted mt">${t("hours")}: ${p.hours}</p>
+    <div class="mt">${p.meds.slice(0,4).map(id => Tag(L(MEDS.find(m=>m.id===id).name).split(" ")[0])).join("")}</div>
+    <div class="actions">
+      <button class="btn sm" data-order="${p.id}" ${p.delivery && p.open ? "" : "disabled"}>${t("order")}</button>
+      <a class="btn sm ghost" href="tel:${p.phone}" data-demo-call="${p.phone}">${t("call")}</a>
+      <a class="btn sm ghost" target="_blank" rel="noopener" href="${mapsLink(p)}">${t("directions")}</a>
+    </div></article>`;
+}
+
+function MedCard(m){
+  return `<article class="card reveal">
+    <h3>${esc(L(m.name))}</h3>
+    <div class="mt">${m.rx ? Tag("℞ " + t("rx"),"off") : Tag(t("otc"),"on")}${Tag("₹" + m.price + " (demo)")}</div>
+    <p class="mt"><b>${t("uses")}:</b> ${esc(L(m.use))}</p>
+    <p class="muted mt"><b>${t("warn")}:</b> ${esc(L(m.warn))}</p></article>`;
+}
+
+function HospitalCard(h){
+  const typeLbl = h.type === "gov" ? t("f_gov") : h.type === "private" ? t("f_private") : t("f_clinic");
+  return `<article class="card reveal">${DemoTag()}
+    <div class="row between"><h3>🏥 ${esc(L(h.name))}</h3><span class="dist">${h.d.toFixed(1)} ${t("km")}</span></div>
+    <div class="mt">${Tag(typeLbl,"blue")}${h.open ? Tag(t("open_now"),"on") : Tag(t("closed"),"off")}${h.beds ? Tag(t("beds") + ": " + h.beds) : ""}</div>
+    <p class="muted mt">${t("hours")}: ${h.hours}</p>
+    <div class="mt">${L(h.services).map(s => Tag(s)).join("")}</div>
+    <div class="actions"><a class="btn sm" href="tel:${h.phone}" data-demo-call="${h.phone}">${t("call")}</a>
+    <a class="btn sm ghost" target="_blank" rel="noopener" href="${mapsLink(h)}">${t("directions")}</a></div></article>`;
+}
+
+function AmbulanceCard(a){
+  return `<article class="card reveal">${DemoTag()}
+    <div class="row between"><h3>🚑 ${esc(L(a.name))}</h3><span class="dist">${a.d.toFixed(1)} ${t("km")}</span></div>
+    <div class="mt">${a.avail ? Tag(t("available_online").replace(/.*/, state.lang==="hi"?"उपलब्ध (डेमो)":"Available (demo)"),"on") : Tag(t("unavailable"),"off")}
+      ${Tag(a.level === "adv" ? t("amb_adv") : t("amb_basic"))}${Tag(a.kind === "free" ? t("amb_free") : t("amb_priv"),"blue")}</div>
+    <div class="actions"><a class="btn sm red" href="tel:${a.phone}" data-demo-call="${a.phone}">📞 ${t("call")} ${a.phone}</a></div></article>`;
+}
+
+/* Radar-style SVG map: relative positions from the user's location */
+function MapSVG(items, color){
+  const W = 400, H = 340, cx = 200, cy = 170, rMax = 140;
+  const pts = items.map(i => {
+    const dx = (i.lng - state.loc.lng) * 111 * Math.cos(toRad(state.loc.lat));
+    const dy = -(i.lat - state.loc.lat) * 111;
+    return {i, dx, dy};
+  });
+  const maxD = Math.max(1, ...pts.map(p => Math.hypot(p.dx, p.dy)));
+  const s = rMax / maxD;
+  return `<svg class="map" viewBox="0 0 ${W} ${H}" role="img" aria-label="${t("map_title")}">
+    ${[.33,.66,1].map(f => `<circle cx="${cx}" cy="${cy}" r="${rMax*f}" fill="none" stroke="rgba(255,255,255,.15)" stroke-dasharray="4 5"/>`).join("")}
+    <line x1="${cx-rMax}" y1="${cy}" x2="${cx+rMax}" y2="${cy}" stroke="rgba(255,255,255,.08)"/>
+    <line x1="${cx}" y1="${cy-rMax}" x2="${cx}" y2="${cy+rMax}" stroke="rgba(255,255,255,.08)"/>
+    <g class="sweep"><path d="M200 170 L340 170 A140 140 0 0 0 ${200+140*Math.cos(toRad(-35))} ${170+140*Math.sin(toRad(-35))} Z" fill="rgba(255,212,59,.10)"/></g>
+    ${pts.map(p => `<g class="dot"><circle cx="${cx+p.dx*s}" cy="${cy+p.dy*s}" r="7" fill="${color}"><title>${esc(L(p.i.name))} – ${Math.hypot(p.dx,p.dy).toFixed(1)} km</title></circle></g>`).join("")}
+    <circle cx="${cx}" cy="${cy}" r="9" fill="#fff" stroke="${'#FFD43B'}" stroke-width="4"/>
+    <text x="${cx+14}" y="${cy-12}" fill="#fff" font-size="13" font-weight="700">${t("you")}</text>
+    <text x="10" y="${H-10}" fill="#9FB1D1" font-size="11">${t("map_title")} · outer ring ≈ ${maxD.toFixed(1)} km</text></svg>`;
+}
+
+const Filters = ({placeholder, extra=""}) => `
+  <div class="filters">
+    <label class="search"><span>🔍</span><input id="q" type="search" value="${esc(state.q)}" placeholder="${esc(placeholder)}" aria-label="search" autocomplete="off"></label>
+    ${extra}
+  </div>`;
+
+function SpecPills(){
+  return `<div class="pills"><button class="pill ${state.spec==="all"?"on":""}" data-spec="all">${t("ctx_all")}</button>
+    ${SPECS.map(s => `<button class="pill ${state.spec===s.id?"on":""}" data-spec="${s.id}">${s.ic} ${esc(L(s))}</button>`).join("")}</div>`;
+}
+
+function CtxBar(){
+  const sp = specOf(state.spec);
+  return `<div class="ctx" aria-label="context">
+    <span>${t("ctx_loc")}: <b>${esc(state.loc.name)}</b></span>
+    <span>${t("ctx_spec")}: <b>${esc(sp ? L(sp) : t("ctx_all"))}</b></span>
+    <span>${t("ctx_med")}: <b>${esc(state.medicine || t("ctx_all"))}</b></span>
+    <span>${t("ctx_hosp")}: <b>${esc(tpl("{hospital_type}"))}</b></span>
+    <span>${t("ctx_lang")}: <b>${esc(tpl("{language}"))}</b></span>
+    <button class="pill" data-locate>${t("locate")}</button></div>`;
+}
+
+/* ---------- Views ---------- */
+const VIEWS = {
+  home(){
+    return `
+    <section class="hero">
+      <div><h1>${t("hero_title")}</h1><p>${t("hero_sub")}</p>
+        <div class="cta"><button class="btn" data-go="doctors">${t("cta_doc")}</button>
+        <button class="btn ghost" data-go="emergency">🚑 ${t("cta_sos")}</button></div></div>
+      <div class="hero-art"><div class="ring"></div><div class="ring r2"></div><div class="core">✚</div>
+        <div class="chip-float">${t("chip1")}</div><div class="chip-float">${t("chip2")}</div>
+        <div class="chip-float">${t("chip3")}</div><div class="chip-float">${t("chip4")}</div></div>
+    </section>
+    ${CtxBar()}
+    <h2 class="mt">${t("spec_title")}</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+      ${SPECS.map(s => `<button class="card reveal" data-pickspec="${s.id}" style="text-align:left"><div style="font-size:2rem">${s.ic}</div><b>${esc(L(s))}</b>
+        <div class="muted" style="font-size:.8rem">${DOCTORS.filter(d=>d.spec===s.id).length} ${state.lang==="hi"?"डॉक्टर":"doctors"}</div></button>`).join("")}
+    </div>
+    <h2 style="margin-top:34px">${t("dash_title")}</h2>
+    <div class="stats">
+      ${[["st_doc",DOCTORS.length],["st_pharm",PHARMACIES.length],["st_hosp",HOSPITALS.length],["st_amb",AMBULANCES.length]]
+        .map(([k,n]) => `<div class="stat reveal"><b data-count="${n}">0</b>${t(k)}</div>`).join("")}
+    </div>
+    <div class="panel reveal"><h3>${t("chart_title")}</h3>
+      <div class="bars" id="bars">${SPECS.map((s,i) => { const v = [42,35,58,49,64,27,51,38][i]; return `<div data-h="${v}"><em>${v}</em><span>${s.ic}</span></div>`; }).join("")}</div>
+      <p class="dash-note">${t("dash_note")}</p></div>`;
+  },
+
+  doctors(){
+    return `<div class="section-head"><div><h2>${t("doc_title")}</h2><p class="muted" id="resCount"></p></div></div>
+      ${CtxBar()}
+      ${Filters({placeholder:t("search_ph"), extra:`
+        <select id="fMode" aria-label="${t("f_mode")}"><option value="all">${t("f_mode")}: ${t("f_all")}</option>
+          <option value="online" ${state.mode==="online"?"selected":""}>${t("f_online")}</option>
+          <option value="offline" ${state.mode==="offline"?"selected":""}>${t("f_offline")}</option></select>
+        <select id="fSort" aria-label="${t("f_sort")}">
+          <option value="dist" ${state.sort==="dist"?"selected":""}>${t("f_sort")}: ${t("f_dist")}</option>
+          <option value="rating" ${state.sort==="rating"?"selected":""}>${t("f_rating")}</option>
+          <option value="fee" ${state.sort==="fee"?"selected":""}>${t("f_fee")}</option></select>`})}
+      ${SpecPills()}
+      <div class="grid" id="list"></div>
+      <h2 style="margin-top:34px">${t("my_appts")}</h2><div id="appts" class="grid"></div>`;
+  },
+
+  pharmacy(){
+    return `<div class="section-head"><div><h2>${t("pharm_title")}</h2><p class="muted" id="resCount"></p></div></div>
+      ${CtxBar()}
+      ${Filters({placeholder:t("med_ph"), extra:`
+        <button class="pill ${state.deliveryOnly?"on":""}" data-toggle="deliveryOnly">🛵 ${t("f_delivery")}</button>
+        <button class="pill ${state.openOnly?"on":""}" data-toggle="openOnly">🟢 ${t("f_open")}</button>`})}
+      <div class="two"><div><div class="grid" id="list" style="grid-template-columns:1fr"></div></div>
+        <div><div id="mapBox"></div><h2 style="margin:24px 0 6px">${t("med_title")}</h2>
+          <p class="muted" style="font-size:.85rem;margin-bottom:12px">${t("med_disclaimer")}</p>
+          <div class="grid" id="meds" style="grid-template-columns:1fr"></div></div></div>`;
+  },
+
+  hospitals(){
+    const types = [["all",t("f_all")],["gov",t("f_gov")],["private",t("f_private")],["clinic",t("f_clinic")]];
+    return `<div class="section-head"><div><h2>${t("hosp_title")}</h2><p class="muted" id="resCount"></p></div></div>
+      ${CtxBar()}
+      ${Filters({placeholder:t("search_ph"), extra:`<button class="pill ${state.openOnly?"on":""}" data-toggle="openOnly">🟢 ${t("f_open")}</button>`})}
+      <div class="pills">${types.map(([k,l]) => `<button class="pill ${state.hospType===k?"on":""}" data-htype="${k}">${l}</button>`).join("")}</div>
+      <div id="mapBox" style="margin-bottom:16px"></div><div class="grid" id="list"></div>`;
+  },
+
+  emergency(){
+    return `<div class="card sos reveal"><div class="row" style="flex-wrap:wrap;gap:22px">
+      <button class="sos-btn" data-sos>${t("sos")}</button>
+      <div style="flex:1;min-width:240px"><h2>${t("emer_title")}</h2><p>${t("emer_sub")}</p>
+        <div class="actions"><a class="btn" style="background:#fff" href="tel:112">📞 112</a>
+        <a class="btn" style="background:#fff" href="tel:102">📞 102</a><a class="btn" style="background:#fff" href="tel:108">📞 108</a></div></div></div></div>
+      <div class="panel mt reveal"><h3>${t("sos_help")}</h3>
+        <div class="timeline" id="sosLine">${t("sos_steps").map((s,i)=>`<div data-i="${i}"><i>✓</i>${esc(s)}</div>`).join("")}</div>
+        <p class="muted mt" style="font-size:.85rem">${t("sos_note")}</p></div>
+      <h2 style="margin:26px 0 12px">${t("amb_title")}</h2>
+      <div class="two"><div id="mapBox"></div><div class="grid" id="list" style="grid-template-columns:1fr"></div></div>`;
+  },
+
+  aftercare(){
+    const tabs = [["adm",t("tab_adm")],["op",t("tab_op")],["dis",t("tab_dis")]];
+    return `<h2>${t("after_title")}</h2><p class="muted">${t("after_sub")}</p>
+      <div class="tabs mt">${tabs.map(([k,l]) => `<button class="pill ${state.tab===k?"on":""}" data-tab="${k}">${l}</button>`).join("")}</div>
+      <div class="two"><div class="panel"><div class="row between"><b id="progTxt"></b></div>
+        <div class="progress"><div id="progBar"></div></div><div id="checks"></div></div>
+        <div class="panel"><h3>${state.lang==="hi"?"ज़रूरी सुझाव":"Helpful tips"}</h3>
+        <ul class="muted" style="margin:10px 0 0 18px;display:grid;gap:8px">
+          ${(state.lang==="hi"
+            ? ["सभी दस्तावेज़ों की फोटोकॉपी एक फ़ाइल में रखें।","रिपोर्ट्स की फोटो फ़ोन में भी सुरक्षित रखें।","बीमा हो तो भर्ती से पहले TPA डेस्क से बात करें।","दवा बदलने से पहले डॉक्टर से पूछें।"]
+            : ["Keep photocopies of all documents in one folder.","Save phone photos of every report as backup.","If insured, speak to the hospital TPA desk before admission.","Ask your doctor before changing any medicine."]).map(x=>`<li>${x}</li>`).join("")}</ul>
+        <p class="muted mt" style="font-size:.8rem">${state.lang==="hi"?"यह सामान्य मार्गदर्शन है; अस्पताल की आवश्यकताएँ अलग हो सकती हैं।":"General guidance only; each hospital may require different papers."}</p></div></div>`;
+  },
+
+  pitch(){
+    const hi = state.lang === "hi";
+    const S = (n, title, body) => `<section class="slide reveal" data-n="${n}"><h2 class="hl">${title}</h2>${body}</section>`;
+    const ul = a => `<ul>${a.map(x => `<li>${x}</li>`).join("")}</ul>`;
+    return `<div class="slides"><h2>${t("pitch_title")}</h2>
+      ${S("01","Dhanno",`<h1>${hi?"हर परिवार तक भरोसेमंद स्वास्थ्य सेवा":"Trusted healthcare for every family"}</h1><p class="muted" style="max-width:640px">${hi?"डॉक्टर · दवाइयाँ · अस्पताल · एम्बुलेंस · देखभाल — एक ऐप में, हिन्दी और अंग्रेज़ी दोनों में।":"Doctors · Medicines · Hospitals · Ambulance · Aftercare — one app, in Hindi and English."}</p>`)}
+      ${S("02",hi?"समस्या":"The problem",ul(hi?["कौन-सा डॉक्टर / अस्पताल पास है — यह पता लगाना मुश्किल","दवा की जानकारी और नज़दीकी दुकान बिखरी हुई","आपात में एम्बुलेंस नंबर खोजने में समय बर्बाद","भर्ती / डिस्चार्ज के कागज़ात पर भ्रम"]:["Hard to know which doctor or hospital is nearby","Medicine info and nearby shops are scattered","Time lost finding ambulance numbers in emergencies","Confusion about admission and discharge papers"]))}
+      ${S("03",hi?"समाधान":"The solution",ul(hi?["GPS आधारित दूरी से डॉक्टर, फ़ार्मेसी और अस्पताल","ऑनलाइन/क्लिनिक अपॉइंटमेंट बुकिंग","एक टैप में आपातकालीन संपर्क","चेकलिस्ट के साथ भर्ती–ऑपरेशन–डिस्चार्ज मार्गदर्शन"]:["GPS-sorted doctors, pharmacies and hospitals","Online / in-clinic appointment booking","One-tap emergency contacts","Admission–surgery–discharge checklists"]))}
+      ${S("04",hi?"मुख्य विशेषताएँ":"Key features",ul(hi?["8 विशेषज्ञताएँ: न्यूरो, मनोविज्ञान, दंत, हड्डी, बाल, वृद्ध, स्त्री रोग, गर्भावस्था","हिन्दी–अंग्रेज़ी–हिंग्लिश बहुभाषी खोज","एनिमेटेड डैशबोर्ड और मैप","सब कुछ मोबाइल-अनुकूल"]:["8 specialities: neuro, psychology, dental, ortho, paediatrics, geriatrics, gynaecology, pregnancy","Hindi–English–Hinglish multilingual search","Animated dashboard and map","Fully mobile-friendly"]))}
+      ${S("05",hi?"तकनीक":"Tech stack",ul(["HTML5 · CSS3 (variables, grid, animations) · Vanilla JS",hi?"कंपोनेंट-आधारित रेंडरिंग, i18n शब्दकोश":"Reusable render components, i18n dictionary",hi?"बैकएंड परत: async API + localStorage (सर्वर-रेडी)":"Backend layer: async API + localStorage (server-ready contract)",hi?"आगे: Node/Express + डेटाबेस + असली डॉक्टर/अस्पताल सत्यापन":"Next: Node/Express + database + verified provider onboarding"]))}
+      ${S("06",hi?"भरोसा और अगला कदम":"Trust & next steps",ul(hi?["अभी का सारा डेटा डेमो है — असली उपलब्धता नहीं","असली लॉन्च के लिए अस्पताल/डॉक्टर सत्यापन और गोपनीयता नीति ज़रूरी","चिकित्सा जानकारी केवल सामान्य मार्गदर्शन है","आपात में 112 / 108"]:["All data today is DEMO — not real availability","A real launch needs provider verification and a privacy policy","Medical info is general guidance only","Emergency: dial 112 / 108"]))}
+    </div>`;
+  }
+};
+
+/* ---------- Post-render data bindings ---------- */
+async function fillList(){
+  const list = $("#list"); if (!list) return;
+  const v = state.view; let items = [], html = "";
+  if (v === "doctors"){
+    items = withDist(await API.listDoctors()).filter(d => {
+      const sp = specOf(d.spec);
+      return (state.spec === "all" || d.spec === state.spec)
+        && (state.mode === "all" || d.mode === state.mode || d.mode === "both")
+        && matches(hay(d.name.en, d.name.hi, sp.en, sp.hi, sp.alias, d.place.en, d.place.hi, d.langs), state.q);
+    });
+    items.sort((a,b) => state.sort === "rating" ? b.rating - a.rating : state.sort === "fee" ? a.fee - b.fee : a.d - b.d);
+    html = items.map(DoctorCard).join("");
+    const ap = await API.getAppointments(), box = $("#appts");
+    if (box) box.innerHTML = ap.length ? ap.map(a => `<div class="card"><h3>${esc(a.doctor)}</h3><p class="muted">${esc(a.date)} · ${esc(a.slot)}</p>${Tag(a.status,"on")}${Tag(a.name)}
+        <div class="actions"><button class="btn sm ghost" data-cancel="${a.id}">${t("remove")}</button></div></div>`).join("") : `<p class="muted">${t("none_yet")}</p>`;
+  }
+  if (v === "pharmacy"){
+    const mq = state.q;
+    items = withDist(await API.listPharmacies()).filter(p =>
+      (!state.deliveryOnly || p.delivery) && (!state.openOnly || p.open) &&
+      (!mq || p.meds.some(id => { const m = MEDS.find(x => x.id === id); return matches(hay(m.name.en, m.name.hi, m.alias), mq); }) || matches(hay(p.name.en, p.name.hi), mq)));
+    items.sort((a,b) => a.d - b.d);
+    html = items.map(PharmacyCard).join("");
+    const meds = MEDS.filter(m => matches(hay(m.name.en, m.name.hi, m.alias, m.use.en, m.use.hi), mq));
+    state.medicine = mq && meds[0] ? L(meds[0].name) : "";
+    $("#meds").innerHTML = meds.length ? meds.map(MedCard).join("") : Empty();
+    $("#mapBox").innerHTML = MapSVG(items, "#FFD43B");
+  }
+  if (v === "hospitals"){
+    items = withDist(await API.listHospitals()).filter(h =>
+      (state.hospType === "all" || h.type === state.hospType) && (!state.openOnly || h.open) &&
+      matches(hay(h.name.en, h.name.hi, h.services.en.join(" "), h.services.hi.join(" "), SPECS.filter(s=>h.services.en.some(x=>x.toLowerCase()===s.en.toLowerCase())).map(s=>s.alias).join(" ")), state.q));
+    items.sort((a,b) => a.d - b.d);
+    html = items.map(HospitalCard).join("");
+    $("#mapBox").innerHTML = MapSVG(items, "#3DDC97");
+  }
+  if (v === "emergency"){
+    items = withDist(await API.listAmbulances()).sort((a,b) => (b.avail - a.avail) || (a.d - b.d));
+    html = items.map(AmbulanceCard).join("");
+    $("#mapBox").innerHTML = MapSVG(items, "#FF6B6B");
+  }
+  list.innerHTML = html || Empty();
+  const rc = $("#resCount"); if (rc) rc.textContent = `${items.length} ${t("results")} · ${tpl("{speciality}")} · ${tpl("{location}")}`;
+  observeReveal();
+}
+
+function renderChecklist(){
+  const box = $("#checks"); if (!box) return;
+  const items = AFTERCARE[state.tab][state.lang], done = API.getChecklist(state.tab);
+  box.innerHTML = items.map((txt,i) => `<label class="check ${done.includes(i)?"done":""}"><input type="checkbox" data-ck="${i}" ${done.includes(i)?"checked":""}><span>${esc(txt)}</span></label>`).join("");
+  const pct = Math.round(done.length / items.length * 100);
+  $("#progBar").style.width = pct + "%";
+  $("#progTxt").textContent = `${done.length}/${items.length} ${t("done")} (${pct}%)`;
+}
+
+function animateDashboard(){
+  $$("[data-count]").forEach(el => {
+    const end = +el.dataset.count, t0 = performance.now();
+    const step = now => { const p = Math.min(1, (now - t0) / 1100); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+  requestAnimationFrame(() => setTimeout(() => $$("#bars div").forEach(b => b.style.height = b.dataset.h * 1.9 + "px"), 120));
+}
+
+let io;
+function observeReveal(){
+  if (!("IntersectionObserver" in window)) return $$(".reveal").forEach(e => e.classList.add("in"));
+  io = io || new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }), {threshold:.08});
+  $$(".reveal:not(.in)").forEach((e,i) => { e.style.transitionDelay = Math.min(i * 40, 300) + "ms"; io.observe(e); });
+}
+
+/* ---------- 6. Router, shell & events ---------- */
+const NAV = [["home","🏠"],["doctors","🩺"],["pharmacy","💊"],["hospitals","🏥"],["emergency","🚑"],["aftercare","📄"],["pitch","🎯"]];
+
+function renderShell(){
+  document.documentElement.lang = state.lang === "hi" ? "hi" : "en";
+  $("#demoBanner").textContent = t("demoBanner");
+  $("#footer").textContent = t("footer");
+  $("#topNav").innerHTML = NAV.map(([k]) => `<button data-go="${k}" class="${state.view===k?"active":""}">${t("nav_"+k)}</button>`).join("");
+  const mobile = NAV.filter(([k]) => k !== "pitch" && k !== "aftercare").concat([["aftercare","📄"]]);
+  $("#bottomNav").innerHTML = mobile.map(([k,ic]) => `<button data-go="${k}" class="${state.view===k?"active":""}"><b>${ic}</b>${t("nav_"+k)}</button>`).join("");
+  $$(".lang button").forEach(b => b.classList.toggle("on", b.dataset.lang === state.lang));
+}
+
+async function render(keepScroll){
+  renderShell();
+  const y = scrollY;
+  $("#app").innerHTML = `<div class="view show">${VIEWS[state.view]()}</div>`;
+  if (state.view === "home") animateDashboard();
+  if (state.view === "aftercare") renderChecklist();
+  await fillList();
+  observeReveal();
+  if (keepScroll) scrollTo(0, y); else scrollTo({top:0,behavior:"smooth"});
+}
+
+function go(v){ state.view = v; if (location.hash !== "#" + v) history.replaceState(null, "", "#" + v); render(); }
+
+/* Modals */
+function openModal(html){ $("#modal").innerHTML = html; $("#modalBg").classList.add("open"); const f = $("#modal input,#modal select,#modal button"); f && f.focus(); }
+function closeModal(){ $("#modalBg").classList.remove("open"); }
+
+function bookingModal(id){
+  const d = DOCTORS.find(x => x.id === id), sp = specOf(d.spec);
+  const slots = ["10:00","10:30","11:00","11:30","16:00","16:30","17:00","17:30","18:00"];
+  const today = new Date(); today.setDate(today.getDate() + 1);
+  const iso = today.toISOString().slice(0,10);
+  openModal(`<h2>${t("book_title")}</h2><p class="muted">${esc(L(d.name))} · ${sp.ic} ${esc(L(sp))} · ₹${d.fee}</p>
+    <p class="tag">${d.mode==="online" ? t("f_online") : d.mode==="offline" ? t("f_offline") : t("both")}</p>
+    <label for="bn">${t("your_name")}</label><input id="bn" autocomplete="name">
+    <label for="bp">${t("your_phone")}</label><input id="bp" type="tel" inputmode="tel" autocomplete="tel">
+    <label for="bd">${t("pick_date")}</label><input id="bd" type="date" value="${iso}" min="${iso}">
+    <label>${t("pick_slot")}</label><div class="slots" id="slots">${slots.map((s,i) => `<button class="pill ${i===0?"on":""}" data-slot="${s}">${s}</button>`).join("")}</div>
+    <div class="actions" style="margin-top:20px"><button class="btn" data-confirm="${d.id}">${t("confirm")}</button><button class="btn ghost" data-close>${t("cancel")}</button></div>
+    <p class="muted mt" style="font-size:.75rem">DEMO – ${state.lang==="hi"?"कोई असली बुकिंग नहीं होती।":"no real booking is made."}</p>`);
+}
+
+function orderModal(pid){
+  const p = PHARMACIES.find(x => x.id === pid);
+  const meds = p.meds.map(id => MEDS.find(m => m.id === id));
+  openModal(`<h2>${t("order")}</h2><p class="muted">${esc(L(p.name))} · ${t("eta")} ${p.eta} min</p>
+    <label for="om">${t("ctx_med")}</label>
+    <select id="om">${meds.map(m => `<option value="${m.id}">${esc(L(m.name))}${m.rx ? " ℞" : ""} – ₹${m.price}</option>`).join("")}</select>
+    <label for="on">${t("your_name")}</label><input id="on">
+    <label for="op">${t("your_phone")}</label><input id="op" type="tel" inputmode="tel">
+    <p class="muted mt" style="font-size:.8rem">℞ = ${t("rx")}. ${t("med_disclaimer")}</p>
+    <div class="actions" style="margin-top:18px"><button class="btn" data-confirm-order="${p.id}">${t("order")}</button><button class="btn ghost" data-close>${t("cancel")}</button></div>`);
+}
+
+let sosTimer;
+function runSOS(){
+  clearInterval(sosTimer); state.sosStep = -1;
+  const steps = $$("#sosLine div"); steps.forEach(s => s.classList.remove("done"));
+  sosTimer = setInterval(() => {
+    state.sosStep++; const s = steps[state.sosStep];
+    if (!s) { clearInterval(sosTimer); return; }
+    s.classList.add("done");
+  }, 900);
+  toast(state.lang === "hi" ? "डेमो सिमुलेशन शुरू — असली आपात में 112 डायल करें" : "Demo simulation started — dial 112 in a real emergency");
+}
+
+function locate(){
+  if (!navigator.geolocation) return toast(t("loc_fail"));
+  toast(t("locating"));
+  navigator.geolocation.getCurrentPosition(
+    p => { state.loc = {lat:p.coords.latitude, lng:p.coords.longitude, name: state.lang==="hi" ? "आपकी GPS लोकेशन" : "Your GPS location"};
+           // NOTE: sample data is positioned around the default area, so distances from far-away GPS will look large.
+           API.setPrefs({loc:state.loc}); toast(t("loc_ok")); render(true); },
+    () => { state.loc = DEFAULT_LOC; toast(t("loc_fail")); render(true); },
+    {timeout:8000, maximumAge:60000});
+}
+
+/* Debounced search keeps focus while list updates */
+let st;
+function onSearch(v){ state.q = v; clearTimeout(st); st = setTimeout(async () => { await fillList(); }, 160); }
+
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-go],[data-lang],[data-spec],[data-pickspec],[data-book],[data-order],[data-slot],[data-confirm],[data-confirm-order],[data-close],[data-toggle],[data-htype],[data-tab],[data-sos],[data-locate],[data-cancel],[data-demo-call]");
+  if (e.target.id === "modalBg") return closeModal();
+  if (!el) return;
+  const d = el.dataset;
+  if (d.go){ e.preventDefault(); go(d.go); }
+  else if (d.lang){ state.lang = d.lang; API.setPrefs({lang:state.lang}); render(true); }
+  else if (d.spec){ state.spec = d.spec; render(true); }
+  else if (d.pickspec){ state.spec = d.pickspec; go("doctors"); }
+  else if (d.book !== undefined) bookingModal(d.book);
+  else if (d.order !== undefined) orderModal(d.order);
+  else if (d.slot){ $$("#slots .pill").forEach(b => b.classList.toggle("on", b === el)); }
+  else if (d.confirm){
+    const name = $("#bn").value.trim(), phone = $("#bp").value.trim();
+    if (!name || !phone) return toast(t("need_name"));
+    const doc = DOCTORS.find(x => x.id === d.confirm);
+    await API.bookAppointment({name, phone, doctor:L(doc.name), date:$("#bd").value, slot:($("#slots .on")||{dataset:{slot:"10:00"}}).dataset.slot});
+    closeModal(); toast(t("booked")); render(true);
+  }
+  else if (d.confirmOrder){
+    const name = $("#on").value.trim(), phone = $("#op").value.trim();
+    if (!name || !phone) return toast(t("need_name"));
+    await API.placeOrder({pharmacy:d.confirmOrder, med:$("#om").value, name, phone});
+    closeModal(); toast(t("ordered"));
+  }
+  else if (el.hasAttribute("data-close")) closeModal();
+  else if (d.toggle){ state[d.toggle] = !state[d.toggle]; render(true); }
+  else if (d.htype){ state.hospType = d.htype; render(true); }
+  else if (d.tab){ state.tab = d.tab; render(true); }
+  else if (el.hasAttribute("data-sos")) runSOS();
+  else if (el.hasAttribute("data-locate")) locate();
+  else if (d.cancel){ await API.cancelAppointment(d.cancel); render(true); }
+  else if (d.demoCall && /^DEMO/.test(d.demoCall)){ e.preventDefault(); toast(state.lang==="hi" ? "डेमो नंबर — असली नहीं। आपात में 112 डायल करें।" : "Demo number — not real. Dial 112 in an emergency."); }
+});
+
+document.addEventListener("input", e => {
+  if (e.target.id === "q") onSearch(e.target.value);
+});
+document.addEventListener("change", e => {
+  if (e.target.id === "fMode"){ state.mode = e.target.value; fillList(); }
+  if (e.target.id === "fSort"){ state.sort = e.target.value; fillList(); }
+  if (e.target.dataset && e.target.dataset.ck !== undefined){
+    const cur = API.getChecklist(state.tab), i = +e.target.dataset.ck;
+    API.setChecklist(state.tab, e.target.checked ? [...new Set([...cur, i])] : cur.filter(x => x !== i));
+    renderChecklist();
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+window.addEventListener("hashchange", () => { const v = location.hash.slice(1); if (VIEWS[v] && v !== state.view) { state.view = v; render(); } });
+
+/* Boot */
+(function init(){
+  const h = location.hash.slice(1); if (VIEWS[h]) state.view = h;
+  render(true);
+})();
+</script>
+</body>
+</html>
