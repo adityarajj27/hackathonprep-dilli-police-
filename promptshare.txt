@@ -1,0 +1,28 @@
+ **ROLE:** Act as a senior UI/UX designer and frontend developer specialising in healthcare technology.
+
+**TASK:** Create a modern, animated, responsive healthcare platform connecting patients with online/offline doctors, pharmacies, and hospitals.
+
+**CONTEXT & FEATURES:**
+1. Doctor directory: Online/offline availability, specialities and appointments.
+2. Medicine supply: Nearby medical stores, medicine descriptions and delivery availability.
+3. Hospitals: Nearby clinics, private/government hospitals, opening hours and services.
+4. Specialities: Neurology, psychology, dentistry, orthopaedics, paediatrics, geriatrics, gynaecology and pregnancy care.
+5. Location: GPS-based distance sorting and maps.
+6. Emergency: Ambulance availability and emergency transport contacts.
+7. Aftercare: Hospital admission, operation documents, required medical papers and discharge guidance.
+
+**DESIGN:** Dark navy blue (#071B3A) and bright yellow (#FFD43B) theme with a modern, premium interface. Add smooth animations, hover effects, transitions, interactive cards, animated dashboards and mobile-friendly navigation.
+
+**LANGUAGE:** Hindi-English toggle (हिन्दी / English), with multilingual search.
+
+**FORMAT:** Build a complete frontend application with reusable components, realistic sample data, functional navigation, search, filters and interactive buttons.
+
+**PROMPT CHAINING:** Plan → Design → Develop → Test → Refine.
+
+**TEMPLATE VARIABLES:** {location}, {speciality}, {medicine}, {hospital_type}, {language}.
+
+**TONE:** Professional, trustworthy, accessible and user-friendly.
+
+**LENGTH:** Detailed implementation, step-by-step.
+
+**OUTPUT:** Deliver a working frontend code app and a hackathon-ready presentation-slide-style landing page. Clearly label demo data and avoid presenting unverified medical availability as real.
